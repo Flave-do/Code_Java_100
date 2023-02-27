@@ -1,0 +1,268 @@
+我们可以用java实现一个简单的计算器 
+我们把它分为两个java文件一、计算器窗体部分,二、按键事件处理器部分。经过多次测试，解决了绝大部分bug，也许还有一些bug未发现，欢迎指正。 
+下附计算器截图，有点丑，呵呵，但是是可以用的 
+
+ 
+
+
+
+一、计算器窗体部分 
+
+/*****************************************************************/ 
+package cn.lantian.Jisuan; 
+
+import javax.swing.JButton; 
+
+public class Jisuan{ 
+public static void main(String[] args){ 
+Jisuan js =new Jisuan(); 
+js.init(); 
+} 
+public String[] a1={"ln","log10","exp","sqrt","abs", 
+         "sin","cos","tan","+","*", 
+         "7","8","9","-","/", 
+         "4","5","6",".","清除", 
+         "1","2","3","0","=",}; 
+    public void init(){ 
+       //实例化一个窗体容器 
+       javax.swing.JFrame frame=new javax.swing.JFrame(); 
+       frame.setTitle("计算器"); 
+       frame.setSize(380,390); 
+       //实例化一个流动布局类 
+       java.awt.FlowLayout f1=new java.awt.FlowLayout(); 
+       frame.setLayout(f1);    
+       //将整个计算器分为两部分，两个面板容器panel1，panel2 
+       //第一个面板容器 
+       javax.swing.JPanel panel1=new javax.swing.JPanel(); 
+       //指定高度、宽度。除JFrame（setsize（）；）外，都用这个指定高宽 
+       panel1.setPreferredSize(new java.awt.Dimension(380,120)); 
+       //实例化一个输入框 
+       javax.swing.JTextField jt=new javax.swing.JTextField(); 
+       jt.setPreferredSize(new java.awt.Dimension(330,80)); 
+       jt.setEditable(false); 
+       //设置输入数据从右边开始显示 
+       jt.setHorizontalAlignment(javax.swing.JTextField.RIGHT); 
+       panel1.add(jt); 
+       //第二个面板容器 
+       javax.swing.JPanel panel2=new javax.swing.JPanel(); 
+       //实例化网格布局（宽，高，水平间距，垂直间距） 
+       java.awt.GridLayout f2=new java.awt.GridLayout(5,5,5,12); 
+       panel2.setLayout(f2); 
+       //新建一个control类 
+       Control con =new Control(jt); 
+
+       //添加按键 
+       /***************************************/ 
+       for (int i=0;i<25;i++){ 
+       JButton jb = new JButton(a1[i]); 
+       panel2.add(jb); 
+       jb.addActionListener(con); 
+       } 
+       
+       /**************************/ 
+
+       //将两个面板添加到窗体 
+       frame.add(panel1); 
+       frame.add(panel2); 
+       //善后工作 
+       frame.setDefaultCloseOperation(2); 
+       frame.setLocationRelativeTo(null); //主窗体屏幕居中 
+       frame.setVisible(true); 
+    } 
+} 
+/******************************************************************/ 
+
+
+
+
+二、按键事件处理器部分 
+
+/******************************************************************/ 
+package cn.lantian.Jisuan; 
+
+import java.awt.event.ActionEvent; 
+import java.awt.event.ActionListener; 
+
+import javax.swing.JTextField; 
+
+public class Control implements ActionListener { 
+private String n1 = ""; 
+private String n2 = ""; 
+private String fa = ""; 
+// t1用于判断第二个数输入清屏， 
+/* 
+* t2用于判断是否在输入第二个数完后继续使用运算符,继续使用为false 若继续使用，则运算结果（类似于等号+运算符） 
+*/ 
+/* 
+* t3标记第二次是否输入数据，防止用户在没输入第二个数时，多次按加减乘除 造成多次运算 
+*/ 
+private boolean t1 = true, t2 = true, t3 = false; 
+private JTextField jt; 
+private String c; 
+
+public Control(JTextField jt) { 
+this.jt = jt; 
+} 
+
+public void actionPerformed(ActionEvent e) { 
+c = e.getActionCommand(); 
+switch (c) { 
+case ".": 
+case "0": 
+case "1": 
+case "2": 
+case "3": 
+case "4": 
+case "5": 
+case "6": 
+case "7": 
+case "8": 
+case "9": 
+if (t1) {// 如果t1为真，则累加文本框中的数 
+jt.setText(jt.getText() + c); 
+} else {// 否则就清屏 
+jt.setText(c); 
+t1 = true;// 将t1设为真，让以后输入的数可以累加文本框中的内容 
+t3 = true;// 表明输入了第二个数，再输入运算符时可以进行运算 
+} 
+break; 
+case "+": 
+case "-": 
+if (jt.getText().equals("")){ 
+jt.setText("-"); 
+t1=true; 
+break; 
+} 
+case "*": 
+case "/": 
+if (t2) {// 如果不是继续运算 
+t1 = false;// 输入第二个数时的清屏标志 
+t2 = false;// 连续运算的标志 
+fa = c; 
+// 更改运算符 
+n1 = jt.getText();// 获取n1 
+t3 = false; 
+} else {// 若是连续运算 
+if (t3) {// 若两次按运算符期间输入了第二个数 
+n2 = jt.getText(); 
+switch (fa) {// 根据运算符采取运算方法 
+case "+": 
+float temp1 = Float.parseFloat(n1) 
++ Float.parseFloat(n2); 
+jt.setText("" + temp1); 
+break; 
+case "-": 
+float temp2 = Float.parseFloat(n1) 
+- Float.parseFloat(n2); 
+jt.setText("" + temp2); 
+break; 
+case "*": 
+float temp3 = Float.parseFloat(n1) 
+* Float.parseFloat(n2); 
+jt.setText("" + temp3); 
+break; 
+case "/": 
+float temp4 = Float.parseFloat(n1) 
+/ Float.parseFloat(n2); 
+jt.setText("" + temp4); 
+break; 
+} 
+fa = c;// 更改运算符 
+n1 = jt.getText();// 得到文本框上的数 
+t1 = false;// 下次输数可以清屏 
+t3 = false;// 将t3变为假，输入了第二个数，才变为真 
+} else {// 连续按运算符 
+fa = c;// 更改运算符 
+} 
+} 
+break; 
+case "=": 
+n2 = jt.getText(); 
+if (n1 != "" && n2 != "" && fa != "" && t3)// t3为真，说明输入了第二个数 
+{// 如果合法，就执行等号 
+switch (fa) { 
+case "+": 
+float temp1 = Float.parseFloat(n1) + Float.parseFloat(n2); 
+jt.setText("" + temp1); 
+break; 
+case "-": 
+float temp2 = Float.parseFloat(n1) - Float.parseFloat(n2); 
+jt.setText("" + temp2); 
+break; 
+case "*": 
+float temp3 = Float.parseFloat(n1) * Float.parseFloat(n2); 
+jt.setText("" + temp3); 
+break; 
+case "/": 
+float temp4 = Float.parseFloat(n1) / Float.parseFloat(n2); 
+jt.setText("" + temp4); 
+break; 
+} 
+t1 = false; 
+t2 = true; 
+t3 = false; 
+fa = ""; 
+n2 = "";// 将这两个值赋为空，防止数据记忆影响到后面的数据 
+} 
+break; 
+case "清除": 
+// 清屏并将所有标志变为初值 
+jt.setText(""); 
+t2 = true; 
+t1 = true; 
+t3 = false; 
+n1 = ""; 
+n2 = ""; 
+fa = ""; 
+break; 
+case "sin": 
+if (jt.getText() != "") { 
+jt.setText("" + Math.sin(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "cos": 
+if (jt.getText() != "") { 
+jt.setText("" + Math.cos(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "tan": 
+if (!jt.getText().equals("")) { 
+jt.setText("" + Math.tan(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "ln": 
+if (!jt.getText().equals("")) { 
+jt.setText("" + Math.log(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "log10": 
+if (!jt.getText().equals("")) { 
+jt.setText("" + Math.log10(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "exp": 
+if (!jt.getText().equals("")) { 
+jt.setText("" + Math.exp(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "abs": 
+if (!jt.getText().equals("")) { 
+jt.setText("" + Math.abs(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+case "sqrt": 
+if (!jt.getText().equals("")) { 
+jt.setText("" + Math.sqrt(Float.parseFloat(jt.getText()))); 
+t1 = false; 
+} 
+break; 
+} 
+} 
+} 
